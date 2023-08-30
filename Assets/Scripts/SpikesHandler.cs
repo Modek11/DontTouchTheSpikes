@@ -1,7 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SpikesHandler : MonoBehaviour
 {
@@ -10,44 +11,51 @@ public class SpikesHandler : MonoBehaviour
     
     private GameObject activeSpikes;
     private List<GameObject> spikesToChangePosition = new List<GameObject>();
-    
-    private float countdown = 0;
+    private float spikeShowValueX = -2.6f;
+    private float spikeHideValueX = -3.1f;
+    private float spikeShowHideSpeed = 0.1f;
     private int spikesToActivate = 5;
-    
-    void Update()
+
+
+    private void Start()
     {
-        SpikeCounter();
+        GameHandler.Instance.OnPlayerHitWall += SidePicker;
     }
 
     private void ChangeSpikes()
     {
         while (spikesToChangePosition.Count < spikesToActivate)
         {
-            var spike = activeSpikes.transform.GetChild(Random.Range(0, 12)).gameObject;
+            var spike = activeSpikes.transform.GetChild(Random.Range(0, 11)).gameObject;
             if(!spikesToChangePosition.Contains(spike))
                 spikesToChangePosition.Add(spike);
         }
 
         foreach (var spike in spikesToChangePosition)
         {
-            //To add spikes movement when proper spikes are choosen
-            //Vector2.MoveTowards()
+            StartCoroutine(ActivateSpike(spike));
         }
+        spikesToChangePosition.Clear();
+        
+        //TODO: hide spikes 
     }
 
-    private void SidePicker()
+    private void SidePicker(bool isFlyingRight)
     {
-        activeSpikes = activeSpikes != rightSpikes ? rightSpikes : leftSpikes;
+        activeSpikes = isFlyingRight ? rightSpikes : leftSpikes;
         ChangeSpikes();
+        
+        Debug.Log(activeSpikes.name);
     }
 
-    private void SpikeCounter()
+    private IEnumerator ActivateSpike(GameObject spike)
     {
-        countdown -= Time.deltaTime;
-        if (countdown < 0)
+        while (Math.Abs(spike.transform.localPosition.x - spikeShowValueX) > 0.005f)
         {
-            SidePicker();
-            countdown = 3;
+            spike.transform.localPosition += Vector3.right * 0.01f;
+            yield return new WaitForSeconds(.005f);
         }
     }
+
+
 }
