@@ -1,8 +1,6 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 public class SpikesHandler : MonoBehaviour
 {
@@ -13,7 +11,7 @@ public class SpikesHandler : MonoBehaviour
     private List<GameObject> spikesToChangePosition = new List<GameObject>();
     private float spikeShowValueX = -2.6f;
     private float spikeHideValueX = -3.1f;
-    private float spikeShowHideSpeed = 0.1f;
+    private float spikeShowHideSpeed = 0.01f;
     private int spikesToActivate = 5;
 
 
@@ -24,6 +22,14 @@ public class SpikesHandler : MonoBehaviour
 
     private void ChangeSpikes()
     {
+        //Deactivate all spikes
+        foreach (var spike in spikesToChangePosition)
+        {
+            StartCoroutine(DeactivateSpike(spike));
+        }
+        spikesToChangePosition.Clear();
+        
+        //Choose choose spikes to show
         while (spikesToChangePosition.Count < spikesToActivate)
         {
             var spike = activeSpikes.transform.GetChild(Random.Range(0, 11)).gameObject;
@@ -31,28 +37,33 @@ public class SpikesHandler : MonoBehaviour
                 spikesToChangePosition.Add(spike);
         }
 
+        //Activate all chosen spikes
         foreach (var spike in spikesToChangePosition)
         {
             StartCoroutine(ActivateSpike(spike));
-        }
-        spikesToChangePosition.Clear();
-        
-        //TODO: hide spikes 
+        } 
     }
 
     private void SidePicker(bool isFlyingRight)
     {
         activeSpikes = isFlyingRight ? rightSpikes : leftSpikes;
         ChangeSpikes();
-        
-        Debug.Log(activeSpikes.name);
     }
 
     private IEnumerator ActivateSpike(GameObject spike)
     {
-        while (Math.Abs(spike.transform.localPosition.x - spikeShowValueX) > 0.005f)
+        while (Mathf.Abs(spike.transform.localPosition.x - spikeShowValueX) > 0.005f)
         {
-            spike.transform.localPosition += Vector3.right * 0.01f;
+            spike.transform.localPosition += Vector3.right * spikeShowHideSpeed;
+            yield return new WaitForSeconds(.005f);
+        }
+    }
+    
+    private IEnumerator DeactivateSpike(GameObject spike)
+    {
+        while (Mathf.Abs(spike.transform.localPosition.x - spikeHideValueX) > 0.005f)
+        {
+            spike.transform.localPosition += Vector3.left * spikeShowHideSpeed;
             yield return new WaitForSeconds(.005f);
         }
     }
