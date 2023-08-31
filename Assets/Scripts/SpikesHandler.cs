@@ -18,6 +18,7 @@ public class SpikesHandler : MonoBehaviour
     private void Start()
     {
         GameHandler.Instance.OnPlayerHitWall += SidePicker;
+        SidePicker(true);
     }
 
     private void ChangeSpikes()

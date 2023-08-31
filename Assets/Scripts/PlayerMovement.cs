@@ -5,9 +5,9 @@ public class PlayerMovement : MonoBehaviour
 { 
     [SerializeField] private float horizontalSpeed = 0;
     [SerializeField] private float jumpForce = 5;
-    
-    private readonly float rightXValue = 3;
-    private readonly float leftXValue = -3;
+
+    private const float RightXValue = 3;
+    private const float LeftXValue = -3;
     private bool isFlyingRight = true;
     
     private Rigidbody2D rb;
@@ -19,7 +19,6 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerInputSystem = new PlayerInputSystem();
         playerInputSystem.Gameplay.Enable();
-        
     }
 
     private void Start()
@@ -48,7 +47,7 @@ public class PlayerMovement : MonoBehaviour
 
     private float HorizontalXValue()
     {
-        return isFlyingRight ? rightXValue : leftXValue;
+        return isFlyingRight ? RightXValue : LeftXValue;
     }
     
     private void ChangeBirdDirection()
