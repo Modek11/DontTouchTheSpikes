@@ -9,6 +9,7 @@ public class PlayerMovement : MonoBehaviour
     private const float RightXValue = 3;
     private const float LeftXValue = -3;
     private bool isFlyingRight = true;
+    private bool isDead = false;
     
     private Rigidbody2D rb;
     private PlayerInputSystem playerInputSystem;
@@ -24,19 +25,24 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         playerInputSystem.Gameplay.Jump.started += JumpOnstarted;
+        GameHandler.Instance.OnPlayerDie += Die;
     }
 
     private void FixedUpdate()
     {
+        if (isDead) return;
+        
         var target = new Vector2(HorizontalXValue(),rb.position.y);
         rb.position = Vector2.MoveTowards(rb.position, target, horizontalSpeed);
     }
 
     private void OnCollisionEnter2D(Collision2D col)
     {
+        if (isDead) return;
+        
         if (col.collider.CompareTag("Spike"))
         {
-            Die();
+            GameHandler.Instance.InvokeOnPlayerDie();
         }
         else
         {
@@ -63,7 +69,14 @@ public class PlayerMovement : MonoBehaviour
     
     private void Die()
     {
-        Debug.Log("dead");
+        isDead = true;
+        playerInputSystem.Disable();
+        rb.constraints = RigidbodyConstraints2D.None;
+        rb.AddTorque(2f,ForceMode2D.Impulse);
     }
-    
+
+    private void OnDestroy()
+    {
+        playerInputSystem.Dispose();
+    }
 }
